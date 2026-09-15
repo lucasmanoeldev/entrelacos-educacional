@@ -30,8 +30,11 @@ TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIR
               'OPTIONS': {'context_processors': ['django.template.context_processors.request',
                          'django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages']}}]
 DATABASES = {'default': dj_database_url.config(default=f'sqlite:///{BASE_DIR / "db.sqlite3"}', conn_max_age=60)}
-if not DEBUG and DATABASES['default']['ENGINE'].endswith('sqlite3'):
-    raise RuntimeError('Produção exige DATABASE_URL PostgreSQL.')
+ALLOW_SQLITE = os.getenv('ALLOW_SQLITE', 'false').lower() == 'true'
+if not DEBUG and DATABASES['default']['ENGINE'].endswith('sqlite3') and not ALLOW_SQLITE:
+    raise RuntimeError('Defina DATABASE_URL PostgreSQL ou ALLOW_SQLITE=true para teste temporário.')
+if DATABASES['default']['ENGINE'].endswith('sqlite3'):
+    DATABASES['default']['OPTIONS'] = {'timeout': 20}
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 10}},

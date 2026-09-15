@@ -6,33 +6,22 @@
 2. Não envie `.env`, `.env.local`, `.venv`, `node_modules` ou `db.sqlite3`.
 3. Decida o domínio final do frontend. Use a URL exata na configuração de CORS, sem barra final.
 
-O `render.yaml` usa Web Service **starter** e PostgreSQL **basic-256mb**, que são recursos pagos. Revise os valores apresentados pelo Render antes de confirmar. O projeto não faz a contratação por você.
+## Teste gratuito no Render com SQLite
 
-## Opção A — API e PostgreSQL pelo Blueprint do Render
+O `render.yaml` cria somente uma API no plano **free**, sem PostgreSQL e sem disco pago.
 
-1. No Render, escolha **New → Blueprint** e conecte o repositório.
-2. O Render encontra `render.yaml` na raiz e prepara somente o banco e a API. O frontend pode ser publicado separadamente na Vercel ou como Static Site no Render.
-3. Preencha as variáveis solicitadas:
+1. Conecte o repositório em **New → Blueprint**.
+2. Informe `NVIDIA_API_KEY` no painel para ativar a IA.
+3. A API usa `DEBUG=false`, `ALLOW_SQLITE=true` e `DATABASE_URL=sqlite:////tmp/entrelacos.sqlite3`.
+4. As migrations executam na inicialização, antes do Gunicorn, criando as tabelas quando o arquivo não existir.
+5. `SECRET_KEY` é gerada pelo Render e permanece nas variáveis do serviço.
+6. Verifique `/api/v1/health/`. Cadastre uma nova conta; o banco local não é enviado.
 
-| Serviço | Variável | Exemplo |
-|---|---|---|
-| API | `FRONTEND_URL` | `https://seu-frontend.onrender.com` |
-| API | `CORS_ALLOWED_ORIGINS` | `https://seu-frontend.onrender.com` |
-| API | `NVIDIA_API_KEY` | Chave da NVIDIA, somente no painel |
-| API | `EMAIL_HOST_USER` | Conta Gmail autorizada |
-| API | `EMAIL_HOST_PASSWORD` | Senha de aplicativo do Gmail |
-| API | `DEFAULT_FROM_EMAIL` | Mesmo endereço de `EMAIL_HOST_USER` |
+**Os dados são temporários e podem desaparecer em reinícios ou deploys.** O plano gratuito também pode suspender a API por inatividade. Use apenas para testes.
 
-4. Confirme os **domínios efetivamente atribuídos** pelo Render. Nomes de serviço não garantem um subdomínio específico. Se forem diferentes dos valores iniciais, corrija as variáveis e faça novo deploy do frontend.
-5. `DATABASE_URL` e `SECRET_KEY` são conectados/gerados pelo Blueprint; não copie segredos no código.
-6. A API executa migrations no `preDeployCommand`. O PostgreSQL usa a versão 17 e começa com 1 GB. O banco local não é importado automaticamente.
-7. Verifique `https://sua-api.onrender.com/api/v1/health/` e depois faça o roteiro funcional abaixo.
+SMTP fica desativado (`django.core.mail.backends.dummy.EmailBackend`), porque o Render gratuito bloqueia as portas do Gmail. Recuperação de senha não envia mensagens nesse ambiente. A configuração local do Gmail permanece no `.env` local.
 
-O export usa `trailingSlash: true`: `/jogar/` gera `out/jogar/index.html`. **Não adicione um rewrite global de todas as rotas para `/index.html`**. Os links compartilhados usam `/jogar/?codigo=XXXXXXXX`, evitando dependência de rotas dinâmicas em runtime.
-
-O Gmail exige uma API paga no Render: instâncias Web gratuitas bloqueiam as portas SMTP 25, 465 e 587. O Blueprint já configura TLS na porta 587; informe os segredos no painel. Nunca envie o arquivo `.env` para o GitHub.
-
-Para hospedar também o frontend no Render, crie um Static Site com Root Directory `frontend`, Build Command `npm ci && npm run build`, Publish Directory `out` e `NEXT_PUBLIC_API_URL=https://sua-api.onrender.com/api/v1`.
+O frontend continua local por padrão (`http://localhost:3000`). Ao hospedá-lo, atualize `FRONTEND_URL` e `CORS_ALLOWED_ORIGINS` na API; no frontend, configure `NEXT_PUBLIC_API_URL=https://sua-api.onrender.com/api/v1` e refaça o build.
 
 ## Opção B — Frontend na Vercel e API no Render
 
@@ -49,10 +38,11 @@ Crie um PostgreSQL e um Web Service Python conectados ao repositório:
 | Health Check Path | `/api/v1/health/` |
 | Python | `PYTHON_VERSION=3.12.14` |
 
-Use um plano que suporte pre-deploy; o Blueprint já usa starter. Configure:
+Para migrar para produção persistente, use um plano pago que suporte pre-deploy e configure:
 
 ```text
 DEBUG=false
+ALLOW_SQLITE=false
 SECRET_KEY=<gere um segredo aleatório longo>
 DATABASE_URL=<Internal Database URL do PostgreSQL Render>
 FRONTEND_URL=https://seu-projeto.vercel.app
