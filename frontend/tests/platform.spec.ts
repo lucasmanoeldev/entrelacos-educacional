@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-test('IA NVIDIA gera perguntas reais e abre o rascunho no editor', async ({ page }) => {
-  test.skip(process.env.E2E_NVIDIA_LIVE !== '1', 'Teste real opcional, utiliza a cota NVIDIA configurada na API.');
+test('IA GROQ gera perguntas reais e abre o rascunho no editor', async ({ page }) => {
+  test.skip(process.env.E2E_GROQ_LIVE !== '1', 'Teste real opcional, utiliza a cota GROQ configurada na API.');
   test.setTimeout(180000);
   await page.goto('/cadastro/');
   await page.getByLabel('Seu nome').fill('Teste de Integração IA');
-  await page.getByLabel('E-mail', { exact: true }).fill(`nvidia-${Date.now()}@example.com`);
-  await page.getByLabel(/^Senha/).fill('Integracao!Nvidia2026');
-  await page.getByLabel('Confirme a senha').fill('Integracao!Nvidia2026');
+  await page.getByLabel('E-mail', { exact: true }).fill(`groq-${Date.now()}@example.com`);
+  await page.getByLabel(/^Senha/).fill('Integracao!Groq2026');
+  await page.getByLabel('Confirme a senha').fill('Integracao!Groq2026');
   await page.getByRole('button', { name: 'Criar minha conta' }).click();
   await expect(page.getByRole('heading', { name: 'Olá, Teste!' })).toBeVisible();
   await page.getByRole('link', { name: 'Criar com IA' }).click();
@@ -21,13 +21,13 @@ test('IA NVIDIA gera perguntas reais e abre o rascunho no editor', async ({ page
   await page.getByRole('button', { name: 'Continuar' }).click();
   await expect(page.getByLabel('Enunciado')).not.toHaveValue('');
   await expect(page.getByRole('textbox', { name: 'Alternativa 1 da pergunta 1', exact: true })).not.toHaveValue('');
-  await page.screenshot({ path: 'test-results/nvidia-draft.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/groq-draft.png', fullPage: true });
 });
 
 test('roleta sorteia sem repetir e conclui a partida no celular', async ({ page, request }) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
-  const response = await request.get('http://localhost:8000/api/v1/explore/');
+  const response = await request.get((process.env.E2E_API_URL || 'http://localhost:8000/api/v1') + '/explore/');
   const activities = await response.json();
   const activity = activities.find((a: { title: string }) => a.title === 'Palavras e seus encontros');
   await page.setViewportSize({ width: 390, height: 844 });

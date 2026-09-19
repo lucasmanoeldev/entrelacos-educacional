@@ -37,3 +37,13 @@ O professor informa um tema e a IA pode gerar um rascunho estruturado de pergunt
 **Tema → IA gera atividade → Backend valida → Professor revisa → Publicação**
 
 O conteúdo gerado não é publicado automaticamente. O professor pode revisar, editar ou excluir as perguntas antes de disponibilizar a atividade aos alunos.
+
+## Tecnologia e documentação
+
+Frontend em **Astro**, API **Django** e banco **PostgreSQL/Supabase**. Geração de atividades com **Groq**.
+
+- [Desenvolvimento local](docs/DESENVOLVIMENTO.md)
+- [Publicação no Render/Vercel](docs/DEPLOY.md)
+- [Configuração Groq](docs/GROQ.md)
+- [Otimizações de desempenho](docs/PERFORMANCE.md)
+- [Testes](docs/TESTES.md)

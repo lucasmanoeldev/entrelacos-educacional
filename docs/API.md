@@ -23,6 +23,7 @@ Roles de cadastro: `TEACHER`, `STUDENT`, `SCHOOL_ADMIN`. Administradores são cr
 | Método | Rota | Acesso |
 |---|---|---|
 | GET, POST | `activities/` | Atividades do professor atual / criar |
+| GET | `activities/?summary=1` | Cartões do proprietário com contagens, sem perguntas nem gabaritos |
 | GET, PUT, PATCH, DELETE | `activities/{uuid}/` | Somente proprietário |
 | POST | `activities/{uuid}/publish/` | Proprietário |
 | POST | `activities/{uuid}/unpublish/` | Proprietário |
@@ -32,6 +33,8 @@ Roles de cadastro: `TEACHER`, `STUDENT`, `SCHOOL_ADMIN`. Administradores são cr
 | GET, POST, DELETE | `favorites/` | Conta atual; escrita recebe `{activity_id}` |
 
 Exemplo de criação:
+
+O painel usa o resumo para as listas. O detalhe continua retornando perguntas ao proprietário. Relatórios retornam `ranking: []`; o ranking é calculado apenas no resultado da partida do jogador.
 
 ```json
 {

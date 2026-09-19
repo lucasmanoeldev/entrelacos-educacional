@@ -21,16 +21,18 @@ Os testes de navegador criam uma conta e atividade de teste **no banco apontado 
 
 Screenshots são geradas em `frontend/test-results`, que está ignorada pelo Git.
 
+Os testes também verificam menu persistente, voltar/avançar, cache de listas, logout, recuperação após erro de rede, os cinco formatos e a passagem de um rascunho simulado da IA ao editor. Para usar portas isoladas, configure `PUBLIC_API_URL` antes do build, `E2E_API_URL` para a API dos testes e `E2E_BASE_URL` para o frontend; permita essa origem em `CORS_ALLOWED_ORIGINS` da API de teste.
+
 ## Integrações externas
 
-### NVIDIA
+### GROQ
 
-Os testes automatizados do provedor usam respostas simuladas para verificar endpoint, modelo, JSON, timeout e erros, sem consumir cota. O teste real de navegador é opcional e fica desativado por padrão. Com a API local já usando uma chave NVIDIA válida, execute no PowerShell, dentro de `frontend`:
+Os testes automatizados do provedor usam respostas simuladas para verificar endpoint, modelo, JSON, timeout e erros, sem consumir cota. O teste real de navegador é opcional e fica desativado por padrão. Com a API local já usando uma chave GROQ válida, execute no PowerShell, dentro de `frontend`:
 
 ```powershell
-$env:E2E_NVIDIA_LIVE='1'
-npm run test:e2e -- --grep 'IA NVIDIA'
-Remove-Item Env:E2E_NVIDIA_LIVE
+$env:E2E_GROQ_LIVE='1'
+npm run test:e2e -- --grep 'IA GROQ'
+Remove-Item Env:E2E_GROQ_LIVE
 ```
 
 Esse teste cria uma conta de desenvolvimento, gera uma pergunta real pelo formulário e confere o rascunho no editor. Não publica o conteúdo. Use somente em desenvolvimento/staging e considere a cota de sua conta.
