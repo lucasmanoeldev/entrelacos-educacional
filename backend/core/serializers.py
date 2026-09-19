@@ -30,7 +30,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'subject', 'school_year', 'language', 'template', 'visibility', 'published', 'code', 'questions', 'creator_name', 'plays', 'updated_at']
         read_only_fields = ['code', 'published']
     def get_plays(self, obj):
-        return obj.games.filter(finished_at__isnull=False).count()
+        return obj.plays_total if hasattr(obj, 'plays_total') else obj.games.filter(finished_at__isnull=False).count()
     def validate_template(self, value):
         if value not in TEMPLATES:
             raise serializers.ValidationError('Formato inválido.')
@@ -69,6 +69,11 @@ class PublicActivitySerializer(serializers.ModelSerializer):
         model = Activity
         fields = ['id', 'title', 'description', 'subject', 'school_year', 'template', 'code', 'creator_name', 'question_count', 'plays']
     def get_question_count(self, obj):
-        return obj.questions.count()
+        return obj.question_total if hasattr(obj, 'question_total') else obj.questions.count()
     def get_plays(self, obj):
-        return obj.games.filter(finished_at__isnull=False).count()
+        return obj.plays_total if hasattr(obj, 'plays_total') else obj.games.filter(finished_at__isnull=False).count()
+
+
+class ActivityCardSerializer(PublicActivitySerializer):
+    class Meta(PublicActivitySerializer.Meta):
+        fields = PublicActivitySerializer.Meta.fields + ['visibility', 'published', 'updated_at']

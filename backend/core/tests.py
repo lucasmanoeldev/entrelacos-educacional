@@ -143,7 +143,7 @@ class PlatformTests(APITestCase):
         self.assertNotEqual(response.data['code'], self.code)
         self.assertEqual(len(response.data['questions']), 2)
     def test_ai_without_key_is_explicit(self):
-        with override_settings(NVIDIA_API_KEY=''):
+        with override_settings(GROQ_API_KEY=''):
             response = self.client.post('/api/v1/ai/generate-activity/', {'topic': 'Planetas', 'subject': 'Ciências', 'school_year': '6º ano', 'count': 2, 'difficulty': 'Média'}, format='json')
         self.assertEqual(response.status_code, 503)
     def test_cors_allows_game_token(self):
@@ -163,7 +163,7 @@ class PlatformTests(APITestCase):
         self.assertEqual(self.client.get('/api/v1/auth/me/').status_code, 401)
         self.assertEqual(self.guest.post('/api/v1/auth/reset-password/', data, format='json').status_code, 400)
 
-    @override_settings(NVIDIA_API_KEY='test-key')
+    @override_settings(GROQ_API_KEY='test-key')
     @patch('core.ai_provider.httpx.post')
     def test_ai_returns_validated_draft_without_publishing(self, mock_post):
         import json
@@ -173,7 +173,7 @@ class PlatformTests(APITestCase):
         self.assertEqual(len(response.data['questions']), 2)
         self.assertEqual(self.user.activities.count(), 1)
 
-    @override_settings(NVIDIA_API_KEY='test-key')
+    @override_settings(GROQ_API_KEY='test-key')
     @patch('core.ai_provider.httpx.post')
     def test_ai_invalid_content_is_rejected(self, mock_post):
         mock_post.return_value.json.return_value = {'choices': [{'message': {'content': '{"questions": []}'}}]}

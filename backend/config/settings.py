@@ -30,6 +30,7 @@ TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates', 'DIR
               'OPTIONS': {'context_processors': ['django.template.context_processors.request',
                          'django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages']}}]
 DATABASES = {'default': dj_database_url.config(default=f'sqlite:///{BASE_DIR / "db.sqlite3"}', conn_max_age=60)}
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 ALLOW_SQLITE = os.getenv('ALLOW_SQLITE', 'false').lower() == 'true'
 if not DEBUG and DATABASES['default']['ENGINE'].endswith('sqlite3') and not ALLOW_SQLITE:
     raise RuntimeError('Defina DATABASE_URL PostgreSQL ou ALLOW_SQLITE=true para teste temporário.')
@@ -81,5 +82,5 @@ EMAIL_TIMEOUT = 20
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise RuntimeError('SMTP: escolha EMAIL_USE_TLS ou EMAIL_USE_SSL, não os dois.')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'nao-responda@example.com')
-NVIDIA_API_KEY = os.getenv('NVIDIA_API_KEY', '')
-NVIDIA_MODEL = os.getenv('NVIDIA_MODEL', 'deepseek-ai/deepseek-v4-flash-0731')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-20b')

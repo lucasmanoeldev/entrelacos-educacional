@@ -87,8 +87,8 @@ def record_answer(game, payload):
     return {'correct': correct, 'answer': answer['text'], 'explanation': source.get('explanation', ''), 'points': points,
             'score': game.score, 'finished': bool(game.finished_at), 'next': current_question(game)}
 
-def result_data(game):
-    ranking = GameRanking(game)
+def result_data(game, include_ranking=True):
+    ranking = GameRanking(game) if include_ranking else []
     return {'id': str(game.id), 'name': game.guest_name, 'score': game.score, 'correct': game.correct,
             'total': len(game.snapshot), 'percentage': round(game.correct / len(game.snapshot) * 100),
             'seconds': round((game.finished_at - game.started_at).total_seconds()), 'ranking': ranking,
@@ -97,5 +97,5 @@ def result_data(game):
 def GameRanking(game):
     if game.template == 'flashcards':
         return []
-    return list(game.activity.games.filter(finished_at__isnull=False, template=game.template)
+    return list(type(game).objects.filter(activity_id=game.activity_id, finished_at__isnull=False, template=game.template)
                 .order_by('-score', 'finished_at').values('guest_name', 'score')[:10])

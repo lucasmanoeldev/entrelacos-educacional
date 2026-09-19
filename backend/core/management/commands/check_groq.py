@@ -15,5 +15,5 @@ class Command(BaseCommand):
         draft.update(subject='Ciências', school_year='6º ano', template='quiz', visibility='link')
         serializer = ActivitySerializer(data=draft)
         if not serializer.is_valid() or len(draft.get('questions', [])) != 1:
-            raise CommandError('A NVIDIA respondeu, mas o conteúdo não passou pela validação do editor.')
-        self.stdout.write(self.style.SUCCESS('NVIDIA: conexão e geração de uma pergunta validadas. Nenhum conteúdo foi salvo ou publicado.'))
+            raise CommandError('A GROQ respondeu, mas o conteúdo não passou pela validação do editor.')
+        self.stdout.write(self.style.SUCCESS('GROQ: conexão e geração de uma pergunta validadas. Nenhum conteúdo foi salvo ou publicado.'))

@@ -29,6 +29,9 @@ class Activity(models.Model):
     code = models.CharField(max_length=8, unique=True, default=code)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        indexes = [models.Index(fields=['creator', '-updated_at'], name='activity_owner_recent'),
+                   models.Index(fields=['published', 'visibility', '-updated_at'], name='activity_public_recent')]
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -60,6 +63,9 @@ class Game(models.Model):
     correct = models.PositiveIntegerField(default=0)
     started_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        indexes = [models.Index(fields=['activity', 'finished_at'], name='game_activity_finished'),
+                   models.Index(fields=['activity', 'template', '-score', 'finished_at'], name='game_activity_ranking')]
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

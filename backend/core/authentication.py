@@ -20,7 +20,7 @@ class BearerAuthentication(BaseAuthentication):
         header = request.headers.get('Authorization', '')
         if not header.startswith('Bearer '):
             return None
-        token = AccessToken.objects.select_related('user').filter(digest=digest(header[7:]), expires_at__gt=timezone.now(), user__is_active=True).first()
+        token = AccessToken.objects.select_related('user__profile').filter(digest=digest(header[7:]), expires_at__gt=timezone.now(), user__is_active=True).first()
         if not token:
             raise AuthenticationFailed('Sua sessão expirou. Entre novamente.')
         return token.user, token

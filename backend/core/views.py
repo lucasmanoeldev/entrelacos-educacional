@@ -21,7 +21,8 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.viewsets import ModelViewSet
 from .authentication import issue_token, digest
 from .models import Profile, Activity, Game, Favorite, AccessToken
-from .serializers import ActivitySerializer, PublicActivitySerializer, TEMPLATES
+from .serializers import ActivitySerializer, ActivityCardSerializer, PublicActivitySerializer, TEMPLATES
+from .queries import activity_cards
 from .games import make_snapshot, current_question, record_answer, result_data, spin_wheel
 
 User = get_user_model()
@@ -40,7 +41,10 @@ class GameThrottle(AnonRateThrottle):
         return self.cache_format % {'scope': self.scope, 'ident': identity}
 
 def user_data(user):
-    profile, _ = Profile.objects.get_or_create(user=user)
+    try:
+        profile = user.profile
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=user)
     return {'id': user.id, 'name': user.first_name, 'email': user.email, 'role': profile.role}
 
 def teacher(user):
@@ -152,7 +156,16 @@ class ActivityViewSet(ModelViewSet):
     serializer_class = ActivitySerializer
     http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
     def get_queryset(self):
-        return Activity.objects.filter(creator=self.request.user).prefetch_related('questions__answers').order_by('-updated_at')
+        if self.action == 'results':
+            return Activity.objects.filter(creator=self.request.user)
+        items = activity_cards(Activity.objects.filter(creator=self.request.user)).order_by('-updated_at')
+        if self.action == 'list' and self.request.query_params.get('summary') == '1':
+            return items
+        return items.prefetch_related('questions__answers')
+    def get_serializer_class(self):
+        if self.action == 'list' and self.request.query_params.get('summary') == '1':
+            return ActivityCardSerializer
+        return ActivitySerializer
     def perform_create(self, serializer):
         teacher(self.request.user)
         serializer.save(creator=self.request.user)
@@ -173,12 +186,12 @@ class ActivityViewSet(ModelViewSet):
     @action(detail=True, methods=['get'])
     def results(self, request, pk=None):
         games = self.get_object().games.filter(finished_at__isnull=False).order_by('-finished_at')
-        return Response([result_data(game) for game in games[:500]])
+        return Response([result_data(game, include_ranking=False) for game in games[:500]])
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def explore(request):
-    items = Activity.objects.filter(published=True, visibility='public').select_related('creator')
+    items = activity_cards(Activity.objects.filter(published=True, visibility='public'))
     query = request.query_params.get('q', '')[:100]
     if query:
         items = items.filter(Q(title__icontains=query) | Q(subject__icontains=query))
@@ -190,7 +203,7 @@ def explore(request):
 @api_view(['POST'])
 def duplicate(request, pk):
     teacher(request.user)
-    activity = get_object_or_404(Activity.objects.filter(Q(creator=request.user) | Q(visibility='public', published=True)), pk=pk)
+    activity = get_object_or_404(activity_cards(Activity.objects.filter(Q(creator=request.user) | Q(visibility='public', published=True))).prefetch_related('questions__answers'), pk=pk)
     data = dict(ActivitySerializer(activity).data)
     data.update(title=f'{activity.title[:145]} (cópia)', visibility='link')
     serializer = ActivitySerializer(data=data)
@@ -201,7 +214,7 @@ def duplicate(request, pk):
 @api_view(['GET', 'POST', 'DELETE'])
 def favorites(request):
     if request.method == 'GET':
-        items = Activity.objects.filter(favorite__user=request.user, visibility='public', published=True)
+        items = activity_cards(Activity.objects.filter(favorite__user=request.user, visibility='public', published=True))
         return Response(PublicActivitySerializer(items, many=True).data)
     activity_id = serializers.UUIDField().run_validation(request.data.get('activity_id'))
     activity = get_object_or_404(Activity, pk=activity_id, visibility='public', published=True)
@@ -212,7 +225,10 @@ def favorites(request):
     return Response(status=204)
 
 def playable(request, code):
-    activity = get_object_or_404(Activity, code=code.upper(), published=True)
+    items = activity_cards()
+    if request.method == 'POST':
+        items = items.prefetch_related('questions__answers')
+    activity = get_object_or_404(items, code=code.upper(), published=True)
     if activity.visibility == 'private' and request.user != activity.creator:
         raise PermissionDenied('Esta atividade é privada.')
     return activity
