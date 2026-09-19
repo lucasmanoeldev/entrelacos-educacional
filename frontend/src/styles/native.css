@@ -1,1 +1,13 @@
 .skip-link{position:absolute;top:-100px;left:1rem;z-index:1000;background:white;padding:1rem}.skip-link:focus{top:1rem}dialog.modal{border:0;max-height:90dvh;overflow:auto;width:min(540px,calc(100% - 32px));margin:auto;color:inherit}dialog::backdrop{background:#201b3566}.modal-close{float:right}.error:empty{display:none}[hidden]{display:none!important}.sidebar nav a>span{width:20px}.game-answers button{min-height:60px}.roulette-wheel{width:min(65vw,280px);aspect-ratio:1;border-radius:50%;margin:20px auto;display:grid;place-items:center;border:9px solid white;box-shadow:0 8px 30px #30244622;transition:transform 2.2s cubic-bezier(.15,.7,.15,1)}.roulette-wheel span{background:white;border-radius:50%;padding:20px;font-size:30px}.roulette-stage{text-align:center}.loading{padding:3rem;text-align:center}.error{padding:1rem;border-radius:12px;background:#fff0ef;color:#972c2c;margin-bottom:1rem}.public-main{max-width:1200px;margin:auto;padding:3rem 24px}.activity-card{content-visibility:auto;contain-intrinsic-size:auto 420px}a,button{-webkit-tap-highlight-color:transparent}input,select,textarea{font-size:16px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.roulette-stage .roulette-wheel {
+  position: relative;
+  inset: auto;
+}
+.roulette-stage .roulette-wheel > span {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  line-height: 1;
+}
