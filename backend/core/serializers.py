@@ -36,8 +36,8 @@ class ActivitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Formato inválido.')
         return value
     def validate_questions(self, value):
-        if not 1 <= len(value) <= 50:
-            raise serializers.ValidationError('Inclua entre 1 e 50 perguntas.')
+        if not value:
+            raise serializers.ValidationError('Inclua ao menos uma pergunta.')
         return value
     def save_questions(self, activity, questions):
         for position, item in enumerate(questions):

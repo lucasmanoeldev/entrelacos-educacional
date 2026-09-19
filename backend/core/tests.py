@@ -188,6 +188,24 @@ class PlatformTests(APITestCase):
         self.assertEqual(self.client.delete('/api/v1/favorites/', {'activity_id': self.id}, format='json').status_code, 204)
         self.assertEqual(self.client.get('/api/v1/favorites/').data, [])
 
+    @patch('core.ai.generate_draft')
+    def test_large_activity_and_ai_count_have_no_old_caps(self, generate):
+        from copy import deepcopy
+        payload = deepcopy(self.payload)
+        payload['questions'] = [deepcopy(self.payload['questions'][0]) for _ in range(57)]
+        for i, question in enumerate(payload['questions']):
+            question['text'] = f'Pergunta {i + 1}'
+        generate.return_value = deepcopy(payload)
+        draft = self.client.post('/api/v1/ai/generate-activity/', {
+            'topic': 'Planetas', 'subject': 'Ciências', 'school_year': '6º ano',
+            'count': 57, 'difficulty': 'Média',
+        }, format='json')
+        self.assertEqual(draft.status_code, 200, draft.data)
+        self.assertEqual(len(draft.data['questions']), 57)
+        saved = self.client.post('/api/v1/activities/', payload, format='json')
+        self.assertEqual(saved.status_code, 201, saved.data)
+        self.assertEqual(len(saved.data['questions']), 57)
+
     def test_roulette_requires_spin_and_never_repeats_questions(self):
         session = self.join('roulette')
         pending = session['question']

@@ -56,7 +56,7 @@ O painel usa o resumo para as listas. O detalhe continua retornando perguntas ao
 }
 ```
 
-De 1 a 50 perguntas; de 2 a 6 alternativas distintas, exatamente uma correta. Publicação é uma ação separada. Visibilidade: `public`, `link`, `private`. Formatos: `quiz`, `true-false`, `flashcards`, `match`, `roulette`. Perguntas são editadas junto da atividade, em transação; não há endpoint separado por pergunta neste MVP.
+Ao menos 1 pergunta, sem máximo fixo de quantidade; de 2 a 6 alternativas distintas, exatamente uma correta. Publicação é uma ação separada. Visibilidade: `public`, `link`, `private`. Formatos: `quiz`, `true-false`, `flashcards`, `match`, `roulette`. Perguntas são editadas junto da atividade, em transação; não há endpoint separado por pergunta neste MVP.
 
 ## Partidas
 

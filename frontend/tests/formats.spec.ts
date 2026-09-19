@@ -27,6 +27,7 @@ test('rascunho da IA chega ao editor sem recarga',async({page})=>{
   await page.route('**/api/v1/ai/generate-activity/',r=>r.fulfill({json:{title:'O ciclo da água',description:'Rascunho',subject:'Ciências',school_year:'6º ano',questions:[{text:'Como a água passa ao estado gasoso?',explanation:'Por evaporação.',answers:[{text:'Evaporação',correct:true},{text:'Congelamento',correct:false}]}]}}));
   await page.goto('/dashboard/ia/');
   await page.getByLabel('Tema ou instrução pedagógica').fill('Ciclo da água');
+  await page.getByLabel('Quantidade de perguntas').fill('1');
   await page.getByRole('button',{name:'Gerar rascunho de atividade'}).click();
   await expect(page.getByLabel('Título da atividade')).toHaveValue('O ciclo da água');
   await page.getByRole('button',{name:'Continuar'}).click();
